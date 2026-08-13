@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Photo Enhancer & Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ AI Photo Magic Studio</h1>
+            <p>Upload your photo, enhance it to HD, or edit it using custom AI prompts!</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Left Side: Control Panel -->
+            <section class="panel control-panel">
+                <div class="upload-box" id="drop-zone">
+                    <input type="file" id="image-input" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <span class="icon">📁</span>
+                        <p><strong>Click to upload</strong> or drag & drop</p>
+                        <small>PNG, JPG, WEBP (Max 16MB)</small>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button id="btn-hd" class="btn btn-primary" disabled>
+                        <span>🚀</span> Make HD Quality
+                    </button>
+
+                    <div class="prompt-box">
+                        <label for="prompt-input">Text Prompt Modification:</label>
+                        <input type="text" id="prompt-input" placeholder="e.g., Make it sunset background, add sunglasses...">
+                        <button id="btn-edit" class="btn btn-secondary" disabled>
+                            <span>🎨</span> Apply AI Edit
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Preview Panel -->
+            <section class="panel preview-panel">
+                <div class="image-wrapper">
+                    <div class="image-box">
+                        <h3>Original Image</h3>
+                        <div class="img-container">
+                            <img id="original-preview" src="" alt="Upload Preview" hidden>
+                            <p class="placeholder-text" id="orig-placeholder">No image uploaded</p>
+                        </div>
+                    </div>
+
+                    <div class="image-box">
+                        <h3>AI Output</h3>
+                        <div class="img-container">
+                            <div class="loader" id="loader" hidden></div>
+                            <img id="result-preview" src="" alt="AI Output" hidden>
+                            <p class="placeholder-text" id="res-placeholder">Result will appear here</p>
+                        </div>
+                        <a id="download-btn" class="btn btn-download" hidden download="ai-enhanced.png">⬇ Download Image</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
