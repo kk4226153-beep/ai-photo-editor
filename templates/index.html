@@ -3,69 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Photo Enhancer & Editor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>AI Photo Magic Studio</title>
+    <!-- CSS Path Fixed for Flask & Vercel -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <header>
+        <!-- Header Section -->
+        <header class="header">
             <h1>✨ AI Photo Magic Studio</h1>
             <p>Upload your photo, enhance it to HD, or edit it using custom AI prompts!</p>
         </header>
 
-        <main class="main-content">
-            <!-- Left Side: Control Panel -->
-            <section class="panel control-panel">
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Controls Panel -->
+            <section class="panel controls-panel">
+                <!-- Image Upload Box -->
                 <div class="upload-box" id="drop-zone">
                     <input type="file" id="image-input" accept="image/*" hidden>
                     <div class="upload-content">
-                        <span class="icon">📁</span>
+                        <div class="folder-icon">📂</div>
                         <p><strong>Click to upload</strong> or drag & drop</p>
-                        <small>PNG, JPG, WEBP (Max 16MB)</small>
+                        <span>PNG, JPG, WEBP (Max 16MB)</span>
                     </div>
                 </div>
 
-                <div class="actions">
-                    <button id="btn-hd" class="btn btn-primary" disabled>
-                        <span>🚀</span> Make HD Quality
-                    </button>
+                <!-- HD Enhancer Button -->
+                <button id="hd-btn" class="btn btn-primary" disabled>
+                    🚀 Make HD Quality
+                </button>
 
-                    <div class="prompt-box">
-                        <label for="prompt-input">Text Prompt Modification:</label>
-                        <input type="text" id="prompt-input" placeholder="e.g., Make it sunset background, add sunglasses...">
-                        <button id="btn-edit" class="btn btn-secondary" disabled>
-                            <span>🎨</span> Apply AI Edit
-                        </button>
-                    </div>
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <!-- Text Editing Section -->
+                <div class="text-edit-section">
+                    <label for="prompt-input">Text Prompt Modification:</label>
+                    <input type="text" id="prompt-input" placeholder="e.g., Make it sunset background, add sunglasses..." disabled>
+                    <button id="edit-btn" class="btn btn-secondary" disabled>
+                        🎨 Apply AI Edit
+                    </button>
                 </div>
             </section>
 
-            <!-- Right Side: Preview Panel -->
+            <!-- Right Preview Panel -->
             <section class="panel preview-panel">
-                <div class="image-wrapper">
-                    <div class="image-box">
-                        <h3>Original Image</h3>
-                        <div class="img-container">
-                            <img id="original-preview" src="" alt="Upload Preview" hidden>
-                            <p class="placeholder-text" id="orig-placeholder">No image uploaded</p>
-                        </div>
+                <!-- Original Image Section -->
+                <div class="image-card">
+                    <h3>Original Image</h3>
+                    <div class="image-wrapper" id="original-wrapper">
+                        <p class="placeholder-text">No image uploaded</p>
+                        <img id="original-img" src="" alt="Original Preview" class="hidden">
                     </div>
+                </div>
 
-                    <div class="image-box">
-                        <h3>AI Output</h3>
-                        <div class="img-container">
-                            <div class="loader" id="loader" hidden></div>
-                            <img id="result-preview" src="" alt="AI Output" hidden>
-                            <p class="placeholder-text" id="res-placeholder">Result will appear here</p>
+                <!-- AI Output Section -->
+                <div class="image-card">
+                    <h3>AI Output</h3>
+                    <div class="image-wrapper" id="output-wrapper">
+                        <p class="placeholder-text">Result will appear here</p>
+                        <img id="output-img" src="" alt="AI Result" class="hidden">
+                        
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="spinner-container hidden">
+                            <div class="spinner"></div>
+                            <p id="loading-text">AI is working its magic...</p>
                         </div>
-                        <a id="download-btn" class="btn btn-download" hidden download="ai-enhanced.png">⬇ Download Image</a>
                     </div>
+                    
+                    <!-- Download Button -->
+                    <a id="download-btn" class="btn btn-download hidden" download="ai-photo.png">
+                        📥 Download HD Image
+                    </a>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <!-- JS Path Fixed for Flask & Vercel -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

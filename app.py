@@ -1,20 +1,16 @@
 import os
-import base64
 from flask import Flask, render_template, request, jsonify
-from dotenv import load_dotenv
 import replicate
+from dotenv import load_dotenv
 
+# Load .env variables
 load_dotenv()
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max 16MB file upload
 
-def image_to_data_uri(file_storage):
-    """Uploaded image file ko base64 data URI me convert karta hai."""
-    file_bytes = file_storage.read()
-    encoded = base64.b64encode(file_bytes).decode('utf-8')
-    mime_type = file_storage.content_type or 'image/png'
-    return f"data:{mime_type};base64,{encoded}"
+# Temporary folder for uploads
+UPLOAD_FOLDER = 'temp_uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
@@ -22,51 +18,67 @@ def index():
 
 @app.route('/api/enhance-hd', methods=['POST'])
 def enhance_hd():
-    """Real-ESRGAN model ke zariye photo ko HD banata hai."""
+    temp_path = None
     try:
         if 'image' not in request.files:
-            return jsonify({'error': 'Koi image select nahi ki gayi'}), 400
+            return jsonify({'success': False, 'error': 'No image provided'})
         
-        file = request.files['image']
-        data_uri = image_to_data_uri(file)
-
-        output = replicate.run(
-            "nightmareai/real-esrgan:42203233982c4e511c7870125f424410808a3264964627050302b11561570773",
-            input={
-                "image": data_uri,
-                "upscale": 2,
-                "face_enhance": True
-            }
-        )
-        return jsonify({'success': True, 'result_url': output})
+        image_file = request.files['image']
+        
+        # Temp location par save karein
+        temp_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
+        image_file.save(temp_path)
+        
+        # File open karke Replicate ko bhejein
+        with open(temp_path, "rb") as file_obj:
+            output = replicate.run(
+                "nightmareai/real-esrgan:42fe04a28c4e0300ed5d14e58f9608711050012cef22b5763234430f150f850b",
+                input={"image": file_obj}
+            )
+        
+        result_url = output[0] if isinstance(output, list) else str(output)
+        return jsonify({'success': True, 'result_url': result_url})
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print("ERROR in HD Enhance:", str(e))
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        # Temp file clean karein
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 @app.route('/api/edit-text', methods=['POST'])
 def edit_text():
-    """InstructPix2Pix model ke zariye text prompt ke mutabiq photo edit karta hai."""
+    temp_path = None
     try:
         if 'image' not in request.files or 'prompt' not in request.form:
-            return jsonify({'error': 'Image ya Text Prompt missing hai'}), 400
+            return jsonify({'success': False, 'error': 'Image and prompt required'})
         
-        file = request.files['image']
+        image_file = request.files['image']
         prompt = request.form['prompt']
-        data_uri = image_to_data_uri(file)
-
-        output = replicate.run(
-            "timothybrooks/instruct-pix2pix:30c1d0b916a6f8ef220d710812582104278a2e5845c47a5183815c32e92c2a05",
-            input={
-                "image": data_uri,
-                "prompt": prompt,
-                "num_inference_steps": 30,
-                "image_guidance_scale": 1.5
-            }
-        )
         
-        result_url = output[0] if isinstance(output, list) else output
+        temp_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
+        image_file.save(temp_path)
+        
+        with open(temp_path, "rb") as file_obj:
+            output = replicate.run(
+                "timbrooks/instruct-pix2pix:30c1d0b916a6f8ef080614f2457e7c08739f73f6b0f33d43f9696ad22e9e6231",
+                input={
+                    "image": file_obj,
+                    "prompt": prompt,
+                    "num_inference_steps": 20
+                }
+            )
+        
+        result_url = output[0] if isinstance(output, list) else str(output)
         return jsonify({'success': True, 'result_url': result_url})
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print("ERROR in Text Edit:", str(e))
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
