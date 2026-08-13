@@ -3,13 +3,11 @@ from flask import Flask, render_template, request, jsonify
 import replicate
 from dotenv import load_dotenv
 
-# Load .env variables
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Temporary folder for uploads
-UPLOAD_FOLDER = 'temp_uploads'
+UPLOAD_FOLDER = '/tmp' if os.environ.get('VERCEL') else 'temp_uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
@@ -24,12 +22,9 @@ def enhance_hd():
             return jsonify({'success': False, 'error': 'No image provided'})
         
         image_file = request.files['image']
-        
-        # Temp location par save karein
         temp_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
         image_file.save(temp_path)
         
-        # File open karke Replicate ko bhejein
         with open(temp_path, "rb") as file_obj:
             output = replicate.run(
                 "nightmareai/real-esrgan:42fe04a28c4e0300ed5d14e58f9608711050012cef22b5763234430f150f850b",
@@ -40,10 +35,8 @@ def enhance_hd():
         return jsonify({'success': True, 'result_url': result_url})
         
     except Exception as e:
-        print("ERROR in HD Enhance:", str(e))
         return jsonify({'success': False, 'error': str(e)})
     finally:
-        # Temp file clean karein
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
 
@@ -74,7 +67,6 @@ def edit_text():
         return jsonify({'success': True, 'result_url': result_url})
         
     except Exception as e:
-        print("ERROR in Text Edit:", str(e))
         return jsonify({'success': False, 'error': str(e)})
     finally:
         if temp_path and os.path.exists(temp_path):
