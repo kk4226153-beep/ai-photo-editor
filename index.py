@@ -1,4 +1,4 @@
 from app import app
 
-# Vercel WSGI Handler
+# Vercel Serverless Entry Point
 app = app
