@@ -1,2 +1,4 @@
 .env
-temp_uploads
+temp_uploads/
+__pycache__/
+*.pyc

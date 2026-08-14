@@ -4,22 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Photo Magic Studio</title>
-    <!-- CSS Path Fixed for Flask & Vercel -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <!-- Header Section -->
         <header class="header">
             <h1>✨ AI Photo Magic Studio</h1>
             <p>Upload your photo, enhance it to HD, or edit it using custom AI prompts!</p>
         </header>
 
-        <!-- Main Workspace -->
         <main class="workspace">
-            <!-- Left Controls Panel -->
             <section class="panel controls-panel">
-                <!-- Image Upload Box -->
                 <div class="upload-box" id="drop-zone">
                     <input type="file" id="image-input" accept="image/*" hidden>
                     <div class="upload-content">
@@ -29,7 +24,6 @@
                     </div>
                 </div>
 
-                <!-- HD Enhancer Button -->
                 <button id="hd-btn" class="btn btn-primary" disabled>
                     🚀 Make HD Quality
                 </button>
@@ -38,7 +32,6 @@
                     <span>OR</span>
                 </div>
 
-                <!-- Text Editing Section -->
                 <div class="text-edit-section">
                     <label for="prompt-input">Text Prompt Modification:</label>
                     <input type="text" id="prompt-input" placeholder="e.g., Make it sunset background, add sunglasses..." disabled>
@@ -48,9 +41,7 @@
                 </div>
             </section>
 
-            <!-- Right Preview Panel -->
             <section class="panel preview-panel">
-                <!-- Original Image Section -->
                 <div class="image-card">
                     <h3>Original Image</h3>
                     <div class="image-wrapper" id="original-wrapper">
@@ -59,21 +50,18 @@
                     </div>
                 </div>
 
-                <!-- AI Output Section -->
                 <div class="image-card">
                     <h3>AI Output</h3>
                     <div class="image-wrapper" id="output-wrapper">
                         <p class="placeholder-text">Result will appear here</p>
                         <img id="output-img" src="" alt="AI Result" class="hidden">
                         
-                        <!-- Loading Spinner -->
                         <div id="loading-spinner" class="spinner-container hidden">
                             <div class="spinner"></div>
                             <p id="loading-text">AI is working its magic...</p>
                         </div>
                     </div>
                     
-                    <!-- Download Button -->
                     <a id="download-btn" class="btn btn-download hidden" download="ai-photo.png">
                         📥 Download HD Image
                     </a>
@@ -82,7 +70,6 @@
         </main>
     </div>
 
-    <!-- JS Path Fixed for Flask & Vercel -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
