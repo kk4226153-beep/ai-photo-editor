@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Photo Magic Studio</title>
     <style>
-        /* Reset and Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -327,19 +326,14 @@
 
             let currentFile = null;
 
-            // Click upload box
-            dropZone.addEventListener('click', () => {
-                imageInput.click();
-            });
+            dropZone.addEventListener('click', () => imageInput.click());
 
-            // File selected
             imageInput.addEventListener('change', (e) => {
                 if (e.target.files && e.target.files[0]) {
                     handleFile(e.target.files[0]);
                 }
             });
 
-            // Drag and drop
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 dropZone.style.borderColor = '#3b82f6';
@@ -362,7 +356,7 @@
 
             function handleFile(file) {
                 if (!file.type.startsWith('image/')) {
-                    alert('Please select an image file!');
+                    alert('Please select a valid image file!');
                     return;
                 }
 
@@ -394,16 +388,17 @@
                         method: 'POST',
                         body: formData
                     });
+                    
                     const data = await response.json();
 
                     if (data.success) {
                         showResult(data.result_url);
                     } else {
-                        alert('Error: ' + data.error);
+                        alert('Server Error: ' + (data.error || 'Unknown error occurred'));
                         hideLoading();
                     }
                 } catch (error) {
-                    alert('Something went wrong!');
+                    alert('Fetch Catch Error: ' + error.message);
                     hideLoading();
                 }
             });
@@ -426,16 +421,17 @@
                         method: 'POST',
                         body: formData
                     });
+                    
                     const data = await response.json();
 
                     if (data.success) {
                         showResult(data.result_url);
                     } else {
-                        alert('Error: ' + data.error);
+                        alert('Server Error: ' + (data.error || 'Unknown error occurred'));
                         hideLoading();
                     }
                 } catch (error) {
-                    alert('Something went wrong!');
+                    alert('Fetch Catch Error: ' + error.message);
                     hideLoading();
                 }
             });
