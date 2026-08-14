@@ -1,14 +1,11 @@
 import os
 from flask import Flask, render_template, request, jsonify
 import replicate
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-UPLOAD_FOLDER = '/tmp' if os.environ.get('VERCEL') else 'temp_uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Vercel requires write operations to be in /tmp
+UPLOAD_FOLDER = '/tmp'
 
 @app.route('/')
 def index():
@@ -19,12 +16,13 @@ def enhance_hd():
     temp_path = None
     try:
         if 'image' not in request.files:
-            return jsonify({'success': False, 'error': 'No image provided'})
+            return jsonify({'success': False, 'error': 'No image uploaded'})
         
         image_file = request.files['image']
         temp_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
         image_file.save(temp_path)
         
+        # Call Replicate API
         with open(temp_path, "rb") as file_obj:
             output = replicate.run(
                 "nightmareai/real-esrgan:42fe04a28c4e0300ed5d14e58f9608711050012cef22b5763234430f150f850b",
