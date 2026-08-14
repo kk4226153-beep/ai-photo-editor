@@ -6,7 +6,6 @@ import replicate
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 def file_to_data_uri(file_storage):
-    """File Storage ko Base64 Data URI mein convert karta hai"""
     file_bytes = file_storage.read()
     base64_encoded = base64.b64encode(file_bytes).decode('utf-8')
     mime_type = file_storage.mimetype or 'image/jpeg'
@@ -31,9 +30,9 @@ def enhance_hd():
         
         client = replicate.Client(api_token=api_key)
         
-        # Real-ESRGAN Model for HD Enhancement
+        # Version ID ki bajaye direct Latest Model name use kiya hai
         output = client.run(
-            "nightmareai/real-esrgan:42fe04a28c4e0300ed5d14e58f9608711050012cef22b5763234430f150f850b",
+            "nightmareai/real-esrgan",
             input={"image": image_data_uri}
         )
         
@@ -60,9 +59,9 @@ def edit_text():
         
         client = replicate.Client(api_token=api_key)
         
-        # Instruct-Pix2Pix Model for AI Text Editing
+        # Direct Latest Model name
         output = client.run(
-            "timbrooks/instruct-pix2pix:30c1d0b916a6f8ef080614f2457e7c08739f73f6b0f33d43f9696ad22e9e6231",
+            "timbrooks/instruct-pix2pix",
             input={
                 "image": image_data_uri,
                 "prompt": prompt,
