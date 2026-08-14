@@ -1,108 +1,149 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const imageInput = document.getElementById('image-input');
-    const originalPreview = document.getElementById('original-preview');
-    const origPlaceholder = document.getElementById('orig-placeholder');
-    const resultPreview = document.getElementById('result-preview');
-    const resPlaceholder = document.getElementById('res-placeholder');
-    const loader = document.getElementById('loader');
+    const originalImg = document.getElementById('original-img');
+    const outputImg = document.getElementById('output-img');
+    const originalPlaceholder = document.querySelector('#original-wrapper .placeholder-text');
+    const outputPlaceholder = document.querySelector('#output-wrapper .placeholder-text');
     
-    const btnHd = document.getElementById('btn-hd');
-    const btnEdit = document.getElementById('btn-edit');
+    const hdBtn = document.getElementById('hd-btn');
+    const editBtn = document.getElementById('edit-btn');
     const promptInput = document.getElementById('prompt-input');
     const downloadBtn = document.getElementById('download-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
 
-    let selectedFile = null;
+    let currentFile = null;
 
-    // Click on upload area
-    dropZone.addEventListener('click', () => imageInput.click());
-
-    // File selected
-    imageInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            handleFile(e.target.files[0]);
-        }
+    // 1. Click to trigger file input
+    dropZone.addEventListener('click', () => {
+        imageInput.click();
     });
 
-    // Drag & Drop events
-    dropZone.addEventListener('dragover', (e) => e.preventDefault());
+    // 2. File Selection Handler
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        handleFile(file);
+    });
+
+    // 3. Drag and Drop Handlers
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#3b82f6';
+        dropZone.style.background = '#f0f9ff';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#cbd5e1';
+        dropZone.style.background = '#ffffff';
+    });
+
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        if (e.dataTransfer.files.length > 0) {
-            handleFile(e.dataTransfer.files[0]);
-        }
+        dropZone.style.borderColor = '#cbd5e1';
+        dropZone.style.background = '#ffffff';
+        const file = e.dataTransfer.files[0];
+        handleFile(file);
     });
 
     function handleFile(file) {
-        if (!file.type.startsWith('image/')) {
-            alert('Sirf image files (PNG, JPG, WEBP) upload karein!');
+        if (!file || !file.type.startsWith('image/')) {
+            alert('Please select a valid image file!');
             return;
         }
-        selectedFile = file;
+
+        currentFile = file;
+
+        // Preview Original Image
         const reader = new FileReader();
         reader.onload = (e) => {
-            originalPreview.src = e.target.result;
-            originalPreview.hidden = false;
-            origPlaceholder.hidden = true;
-            btnHd.disabled = false;
-            btnEdit.disabled = false;
+            originalImg.src = e.target.result;
+            originalImg.classList.remove('hidden');
+            if (originalPlaceholder) originalPlaceholder.classList.add('hidden');
         };
         reader.readAsDataURL(file);
+
+        // Enable Buttons and Inputs
+        hdBtn.disabled = false;
+        editBtn.disabled = false;
+        promptInput.disabled = false;
     }
 
-    async function processAIRequest(endpoint, formData) {
-        loader.hidden = false;
-        resultPreview.hidden = true;
-        resPlaceholder.hidden = true;
-        downloadBtn.hidden = true;
-        btnHd.disabled = true;
-        btnEdit.disabled = true;
+    // 4. Make HD Button Event
+    hdBtn.addEventListener('click', async () => {
+        if (!currentFile) return;
+
+        showLoading('Enhancing image quality...');
+        const formData = new FormData();
+        formData.append('image', currentFile);
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await fetch('/api/enhance-hd', {
                 method: 'POST',
                 body: formData
             });
-
             const data = await response.json();
 
             if (data.success) {
-                resultPreview.src = data.result_url;
-                resultPreview.hidden = false;
-                downloadBtn.href = data.result_url;
-                downloadBtn.hidden = false;
+                showResult(data.result_url);
             } else {
-                alert('Error: ' + (data.error || 'AI Process fail ho gaya'));
-                resPlaceholder.hidden = false;
+                alert('Error: ' + data.error);
+                hideLoading();
             }
-        } catch (err) {
-            alert('Network / Server Error: AI Server se connect nahi ho saka');
-            resPlaceholder.hidden = false;
-        } finally {
-            loader.hidden = true;
-            btnHd.disabled = false;
-            btnEdit.disabled = false;
+        } catch (error) {
+            alert('Something went wrong!');
+            hideLoading();
         }
-    }
-
-    // HD Quality Button Click
-    btnHd.addEventListener('click', () => {
-        if (!selectedFile) return;
-        const formData = new FormData();
-        formData.append('image', selectedFile);
-        processAIRequest('/api/enhance-hd', formData);
     });
 
-    // Text Edit Button Click
-    btnEdit.addEventListener('click', () => {
+    // 5. Apply AI Edit Button Event
+    editBtn.addEventListener('click', async () => {
         const prompt = promptInput.value.trim();
-        if (!selectedFile || !prompt) {
-            alert('Pehle image upload karein aur text prompt likhein!');
+        if (!currentFile || !prompt) {
+            alert('Please enter a prompt first!');
             return;
         }
+
+        showLoading('Applying AI edit...');
         const formData = new FormData();
-        formData.append('image', selectedFile);
+        formData.append('image', currentFile);
         formData.append('prompt', prompt);
-        processAIRequest('/api/edit-text', formData);
+
+        try {
+            const response = await fetch('/api/edit-text', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showResult(data.result_url);
+            } else {
+                alert('Error: ' + data.error);
+                hideLoading();
+            }
+        } catch (error) {
+            alert('Something went wrong!');
+            hideLoading();
+        }
     });
+
+    function showLoading(text) {
+        outputImg.classList.add('hidden');
+        if (outputPlaceholder) outputPlaceholder.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
+        document.getElementById('loading-text').innerText = text;
+        downloadBtn.classList.add('hidden');
+    }
+
+    function hideLoading() {
+        loadingSpinner.classList.add('hidden');
+    }
+
+    function showResult(url) {
+        hideLoading();
+        outputImg.src = url;
+        outputImg.classList.remove('hidden');
+        downloadBtn.href = url;
+        downloadBtn.classList.remove('hidden');
+    }
 });
